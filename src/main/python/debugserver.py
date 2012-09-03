@@ -66,7 +66,15 @@ def run_server(port=6655, host='0.0.0.0', locals=locals()):
         _log = locals["log"]
 
     _log.info("Starting DebugServer on port %d" % port)
-    server = DebugServer(('', port), DebugServerHandler)
+
+    while True:
+        try:
+            server = DebugServer(('', port), DebugServerHandler)
+            break
+        except:
+            port += 1
+            pass
+    
     try:
         server.serve_forever()
     except KeyboardInterrupt:

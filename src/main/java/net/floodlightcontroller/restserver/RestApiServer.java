@@ -40,6 +40,11 @@ public class RestApiServer
     // Application
     // ***********
     
+    @Override
+    public int getServerPort () {
+        return restPort;
+    }
+    
     protected class RestApplication extends Application {
         protected Context context;
         
@@ -132,8 +137,16 @@ public class RestApiServer
         }
         
         RestApplication restApp = new RestApplication();
-        restApp.run(fmlContext, restPort);
-    }
+        
+        while (true) {
+            try {
+                restApp.run(fmlContext, restPort);
+                break;
+            } catch (Exception e){
+                restPort += 1;
+            }
+        }
+    } 
     
     // *****************
     // IFloodlightModule

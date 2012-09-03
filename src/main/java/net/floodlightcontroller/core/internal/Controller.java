@@ -169,6 +169,11 @@ public class Controller implements IFloodlightProviderService,
     
     // Configuration options
     protected int openFlowPort = 6633;
+    
+    @Override
+    public int getOpenFlowPort () {
+        return openFlowPort;
+    }
     protected int workerThreads = 0;
     // The id for this controller node. Should be unique for each controller
     // node in a controller cluster.
@@ -1778,10 +1783,20 @@ public class Controller implements IFloodlightProviderService,
             ChannelPipelineFactory pfact = 
                     new OpenflowPipelineFactory(this, null);
             bootstrap.setPipelineFactory(pfact);
-            InetSocketAddress sa = new InetSocketAddress(openFlowPort);
             final ChannelGroup cg = new DefaultChannelGroup();
-            cg.add(bootstrap.bind(sa));
             
+            InetSocketAddress sa = null;
+            Channel b = null;
+            while (true) {
+                try {   
+                    sa = new InetSocketAddress(openFlowPort);
+                    b = bootstrap.bind(sa);
+                    break;
+                } catch (Exception e) {
+                    openFlowPort += 1;
+                }
+            }
+            cg.add(b);           
             log.info("Listening for switch connections on {}", sa);
         } catch (Exception e) {
             throw new RuntimeException(e);

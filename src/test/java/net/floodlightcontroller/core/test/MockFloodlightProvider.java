@@ -341,4 +341,9 @@ public class MockFloodlightProvider implements IFloodlightModule, IFloodlightPro
             log.debug(sb.toString());            
         }
     }
+
+    @Override
+    public int getOpenFlowPort() {
+        return 6633;
+    }
 }

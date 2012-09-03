@@ -199,4 +199,6 @@ public interface IFloodlightProviderService extends IFloodlightService {
     */
    public long getSystemStartTime();
 
+   public int getOpenFlowPort();
+
 }
