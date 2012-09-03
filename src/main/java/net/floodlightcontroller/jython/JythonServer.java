@@ -4,6 +4,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.floodlightcontroller.core.Main;
+
 import org.python.util.PythonInterpreter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +59,8 @@ public class JythonServer extends Thread {
         p.exec("import sys");
         p.exec("sys.path.append('" + jarPath + "')");
         p.exec("from debugserver import run_server");
-        p.exec("run_server(" + this.port + ", '0.0.0.0', locals())");
+        p.exec("run_server(" + this.port + ", '0.0.0.0', locals()," +
+                           Main.cmdLineSettings.getAutoPickPorts() + ")");
     }
 
 }

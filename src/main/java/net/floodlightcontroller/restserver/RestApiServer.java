@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.restlet.Application;
 import org.restlet.Component;
@@ -24,6 +25,7 @@ import org.restlet.service.StatusService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.floodlightcontroller.core.Main;
 import net.floodlightcontroller.core.module.FloodlightModuleContext;
 import net.floodlightcontroller.core.module.FloodlightModuleException;
 import net.floodlightcontroller.core.module.IFloodlightModule;
@@ -136,16 +138,25 @@ public class RestApiServer
             logger.debug(sb.toString());
         }
         
+        /*
+         *  If we cannot bind to restPort, try with other available ports if
+         *  being asked so.
+         */
         RestApplication restApp = new RestApplication();
-        
-        while (true) {
+        int i = Main.cmdLineSettings.getAutoPickPorts();
+        do {
             try {
                 restApp.run(fmlContext, restPort);
                 break;
-            } catch (Exception e){
-                restPort += 1;
+            } catch (RuntimeException e){
+                if (i == 0) {
+                    throw e;
+                }
+                i -= 1;
+                Random randomGenerator = new Random();
+                restPort += randomGenerator.nextInt(100) + 1;
             }
-        }
+        } while (i > 0);
     } 
     
     // *****************

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import random
 from threading import currentThread
 from SocketServer import BaseRequestHandler, TCPServer
 from code import InteractiveConsole
@@ -56,7 +57,7 @@ class DebugServer(TCPServer):
         _log.debug('Closing connection to DebugServer from %s:%d' % client_address)
         request.close()
 
-def run_server(port=6655, host='0.0.0.0', locals=locals()):
+def run_server(port=6655, host='0.0.0.0', locals=locals(), autoPickPorts = 0):
     currentThread()._thread.setName("debugserver-main")
 
     global _locals
@@ -72,9 +73,15 @@ def run_server(port=6655, host='0.0.0.0', locals=locals()):
             server = DebugServer(('', port), DebugServerHandler)
             break
         except:
-            port += 1
+            if autoPickPorts <= 0:
+                raise
+            #
+            # Automatically new port if being asked so.
+            #
+            port += random.randInt(1, 100)
+            autoPickPorts -= 1
             pass
-    
+
     try:
         server.serve_forever()
     except KeyboardInterrupt:
