@@ -278,7 +278,7 @@ IFlowReconcileListener, IInfoProvider, IHAListener {
             // and the newAP is not a broadcast domain.
             if (!topology.isConsistent(oldSw, oldPort, newSw, newPort) &&
                     !topology.isBroadcastDomainPort(newSw, newPort))
-                return 1;
+                return -1;
 
             // If newAP is inconsistent with the oldAP and
             // oldAP belongs to broadcast domain and
@@ -289,7 +289,7 @@ IFlowReconcileListener, IInfoProvider, IHAListener {
                     topology.isBroadcastDomainPort(newSw, newPort) &&
                     newAP.getLastSeen() > oldAP.getLastSeen() + 
                         AttachmentPoint.EXTERNAL_TO_EXTERNAL_TIMEOUT)
-                return 1;
+                return -1;
 
             // If newAP is inconsistent with the oldAP and
             // oldAP does not to broadcast domain and
@@ -300,7 +300,7 @@ IFlowReconcileListener, IInfoProvider, IHAListener {
                     topology.isBroadcastDomainPort(newSw, newPort) &&
                     newAP.getLastSeen() > oldAP.getLastSeen() + 
                         AttachmentPoint.OPENFLOW_TO_EXTERNAL_TIMEOUT)
-                return 1;
+                return -1;
 
             // If newAP is inconsistent with the oldAP and
             // oldAP does not to broadcast domain and
@@ -309,9 +309,9 @@ IFlowReconcileListener, IInfoProvider, IHAListener {
             if (topology.isConsistent(oldSw, oldPort, newSw, newPort) &&
                     newAP.getLastSeen() > oldAP.getLastSeen() +
                         AttachmentPoint.CONSISTENT_TIMEOUT)
-                return 1;
+                return -1;
 
-            return -1;
+            return 1;
         }
     }
     /**
@@ -790,7 +790,7 @@ IFlowReconcileListener, IInfoProvider, IHAListener {
      * @param switchPort the port
      * @return true if it's a valid attachment point
      */
-    protected boolean isValidAttachmentPoint(long switchDPID,
+    public boolean isValidAttachmentPoint(long switchDPID,
                                              int switchPort) {
         if (topology.isAttachmentPointPort(switchDPID,
                                            (short)switchPort) == false)
@@ -1191,7 +1191,7 @@ IFlowReconcileListener, IInfoProvider, IHAListener {
             for (Long l : deleteQueue) {
                 Device dev = deviceMap.get(l);
                 this.deleteDevice(dev);
-                deviceMap.remove(l);
+                
 
                 // generate new device update
                 deviceUpdates =
@@ -1403,7 +1403,7 @@ IFlowReconcileListener, IInfoProvider, IHAListener {
     	Iterator<Device> diter = deviceMap.values().iterator();
     	while (diter.hasNext()) {
             Device d = diter.next();
-            if (d.getEntityClass() != null && 
+            if (d.getEntityClass() == null ||
             		entityClassNames.contains(d.getEntityClass().getName()))
             	reclassifyDevice(d);
     	}
@@ -1673,7 +1673,7 @@ IFlowReconcileListener, IInfoProvider, IHAListener {
     		}
     		if (entityClass != null && device.getEntityClass() != null) {
     			if (entityClass.getName().
-    					contentEquals(device.getEntityClass().getName())) {
+    					equals(device.getEntityClass().getName())) {
     				entitiesRetained.add(entity);
     			} else {
     				entitiesRemoved.add(entity);
@@ -1702,7 +1702,7 @@ IFlowReconcileListener, IInfoProvider, IHAListener {
 
     	if (entitiesRetained.isEmpty()) {
     		this.deleteDevice(device);
-    		deviceMap.remove(device);
+    		
     		deviceUpdates.add(new DeviceUpdate(device, 
     				DeviceUpdate.Change.DELETE, null
     				));
