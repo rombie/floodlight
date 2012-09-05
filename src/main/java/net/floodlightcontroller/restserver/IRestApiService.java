@@ -8,8 +8,6 @@ public interface IRestApiService extends IFloodlightService {
      * @param routeable
      */
     public void addRestletRoutable(RestletRoutable routable);
-    
-    public int getServerPort();
 
     /**
      * Runs the REST API server

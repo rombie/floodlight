@@ -15,8 +15,6 @@ import net.floodlightcontroller.restserver.IRestApiService;
  */
 public class Main {
 
-    static public CmdLineSettings cmdLineSettings;
-
     /**
      * Main method to load configuration and modules
      * @param args
@@ -27,8 +25,8 @@ public class Main {
         System.setProperty("org.restlet.engine.loggerFacadeClass", 
                 "org.restlet.ext.slf4j.Slf4jLoggerFacade");
         
-        cmdLineSettings = new CmdLineSettings();
-        CmdLineParser parser = new CmdLineParser(cmdLineSettings);
+        CmdLineSettings settings = new CmdLineSettings();
+        CmdLineParser parser = new CmdLineParser(settings);
         try {
             parser.parseArgument(args);
         } catch (CmdLineException e) {
@@ -38,7 +36,7 @@ public class Main {
         
         // Load modules
         FloodlightModuleLoader fml = new FloodlightModuleLoader();
-        IFloodlightModuleContext moduleContext = fml.loadModulesFromConfig(cmdLineSettings.getModuleFile());
+        IFloodlightModuleContext moduleContext = fml.loadModulesFromConfig(settings.getModuleFile());
         // Run REST server
         IRestApiService restApi = moduleContext.getServiceImpl(IRestApiService.class);
         restApi.run();

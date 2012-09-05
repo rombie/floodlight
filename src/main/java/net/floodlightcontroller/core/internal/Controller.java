@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.BlockingQueue;
@@ -58,7 +57,6 @@ import net.floodlightcontroller.core.IListener.Command;
 import net.floodlightcontroller.core.IOFSwitch;
 import net.floodlightcontroller.core.IOFSwitchFilter;
 import net.floodlightcontroller.core.IOFSwitchListener;
-import net.floodlightcontroller.core.Main;
 import net.floodlightcontroller.core.internal.OFChannelState.HandshakeState;
 import net.floodlightcontroller.core.util.ListenerDispatcher;
 import net.floodlightcontroller.core.web.CoreWebRoutable;
@@ -77,7 +75,6 @@ import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelException;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.ChannelStateEvent;
@@ -172,11 +169,6 @@ public class Controller implements IFloodlightProviderService,
     
     // Configuration options
     protected int openFlowPort = 6633;
-    
-    @Override
-    public int getOpenFlowPort () {
-        return openFlowPort;
-    }
     protected int workerThreads = 0;
     // The id for this controller node. Should be unique for each controller
     // node in a controller cluster.
@@ -1781,33 +1773,15 @@ public class Controller implements IFloodlightProviderService,
             bootstrap.setOption("reuseAddr", true);
             bootstrap.setOption("child.keepAlive", true);
             bootstrap.setOption("child.tcpNoDelay", true);
-            bootstrap.setOption("child.sendBufferSize",
-                                Controller.SEND_BUFFER_SIZE);
+            bootstrap.setOption("child.sendBufferSize", Controller.SEND_BUFFER_SIZE);
 
             ChannelPipelineFactory pfact = 
                     new OpenflowPipelineFactory(this, null);
             bootstrap.setPipelineFactory(pfact);
+            InetSocketAddress sa = new InetSocketAddress(openFlowPort);
             final ChannelGroup cg = new DefaultChannelGroup();
+            cg.add(bootstrap.bind(sa));
             
-            InetSocketAddress sa = null;
-            Channel b = null;
-
-            int i = Main.cmdLineSettings.getAutoPickPorts();
-            do {
-                try {
-                    sa = new InetSocketAddress(openFlowPort);
-                    b = bootstrap.bind(sa);
-                    break;
-                } catch (ChannelException e) {
-                    if (i == 0) {
-                        throw e;
-                    }
-                    i -= 1;
-                    Random randomGenerator = new Random();
-                    openFlowPort += randomGenerator.nextInt(100) + 1;
-                }
-            } while (i > 0);
-            cg.add(b);
             log.info("Listening for switch connections on {}", sa);
         } catch (Exception e) {
             throw new RuntimeException(e);
