@@ -257,7 +257,8 @@ entity.getLastSeenTimestamp().getTime());
      * @return
      */
     List<AttachmentPoint> getDuplicateAttachmentPoints(List<AttachmentPoint>oldAPList,
-                                                       Map<Long, AttachmentPoint>apMap) {        ITopologyService topology = deviceManager.topology;
+                                                       Map<Long, AttachmentPoint>apMap) {
+        ITopologyService topology = deviceManager.topology;
         List<AttachmentPoint> dupAPs = new ArrayList<AttachmentPoint>();
         long timeThreshold = System.currentTimeMillis() -
                 AttachmentPoint.INACTIVITY_INTERVAL;
@@ -306,8 +307,6 @@ entity.getLastSeenTimestamp().getTime());
                     new ArrayList<AttachmentPoint>();
             if (newMap != null) newAPList.addAll(newMap.values());
             this.attachmentPoints = newAPList;
-            log.debug("DEVICE_MOVE: Old AttachmentPoints: {}," +
-                    "New AttachmentPoints: {}", apList, newAPList);
         }
 
         // Set the oldAPs to null.
@@ -348,7 +347,6 @@ entity.getLastSeenTimestamp().getTime());
             newAP.setLastSeen(lastSeen);
             this.oldAPs = oldAPList;
             oldAPFlag = true;
-            log.debug("DEVICE_MOVE: OldAPs changed for device: {}", oldAPList);
         }
 
         // newAP now contains the new attachment point.
@@ -358,7 +356,6 @@ entity.getLastSeenTimestamp().getTime());
         if (apMap == null || apMap.isEmpty()) {
             apList.add(newAP);
             attachmentPoints = apList;
-            log.debug("DEVICE_MOVE: First attachmentpoint point for device: {}", apList);
             return true;
         }
 
@@ -371,8 +368,6 @@ entity.getLastSeenTimestamp().getTime());
             apList.addAll(apMap.values());
             apList.add(newAP);
             this.attachmentPoints = apList;
-            log.debug("DEVICE_MOVE: First access point in L2 domain. {}",
-                      apList);
             return true; // new AP found on an L2 island.
         }
 
@@ -380,8 +375,9 @@ entity.getLastSeenTimestamp().getTime());
         // we need to compare oldAP and newAP.
         if (oldAP.equals(newAP)) {
             // nothing to do here. just the last seen has to be changed.
-            if (newAP.lastSeen > oldAP.lastSeen)
-                apMap.put(id, newAP);
+            if (newAP.lastSeen > oldAP.lastSeen) {
+                oldAP.setLastSeen(newAP.lastSeen);
+            }
             this.attachmentPoints =
                     new ArrayList<AttachmentPoint>(apMap.values());
             return false; // nothing to do here.
@@ -393,8 +389,6 @@ entity.getLastSeenTimestamp().getTime());
             apMap.put(id, newAP);
             this.attachmentPoints =
                     new ArrayList<AttachmentPoint>(apMap.values());
-            log.debug("DEVICE_MOVED: Attachment point changed to: {}," +
-                    "putting previous in oldAP: {}", newAP, oldAP);
 
             oldAPList = new ArrayList<AttachmentPoint>();
             if (oldAPs != null) oldAPList.addAll(oldAPs);
@@ -408,8 +402,6 @@ entity.getLastSeenTimestamp().getTime());
             if (oldAPs != null) oldAPList.addAll(oldAPs);
 	    // Add ot oldAPList only if it was picked up from the oldAPList
             if (oldAPFlag) oldAPList.add(newAP);
-            log.debug("DEVICE_MOVED: New attachment point {} does not" +
-                    " replace already existing one {}.", newAP, oldAP);
             this.oldAPs = oldAPList;
         }
 
@@ -528,9 +520,6 @@ entity.getLastSeenTimestamp().getTime());
         if (!includeError)
             return sp.toArray(new SwitchPort[sp.size()]);
 
-        log.debug("DEVICE_APS: Getting all attachment points: APs: {}, oldAPs: {}",
-                  this.attachmentPoints, this.oldAPs);
-
         List<AttachmentPoint> oldAPList;
         oldAPList = new ArrayList<AttachmentPoint>();
 
@@ -549,7 +538,6 @@ entity.getLastSeenTimestamp().getTime());
                     sp.add(swport);
             }
         }
-        log.debug("DEVICE_APS: Duplicate APs: {}", sp);
         return sp.toArray(new SwitchPort[sp.size()]);
     }
 
